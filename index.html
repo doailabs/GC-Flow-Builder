@@ -4,96 +4,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Genesys Cloud Flow Builder</title>
+  <title>OpenAI Chat Interface</title>
   <script src="https://sdk-cdn.mypurecloud.com/javascript/latest/purecloud-platform-client-v2.min.js"></script>
   <script src="https://sdk-cdn.mypurecloud.com/client-apps/2.6.3/purecloud-client-app-sdk-de77761d.min.js"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="startGCSDKs.js"></script>
-  <script src="getAnalytics.js"></script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css">
-  <script src="draw.js"></script>
+  <script src="createFlow.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <h1 id="title">Genesys Cloud Flow Builder</h1>
-  <section>
-    <h2>Date selection</h2>
-    <label for="startDate">Start date: </label>
-    <input type="date" id="startDate" name="startDate"><br>
-    <label for="endDate">End date: </label>
-    <input type="date" id="endDate" name="endDate"><br>
-    <button id="saveButton">Save</button>
-    <p id="error" style="color: red;"></p>
-  </section>
-<section id="groupingSection" style="display: none;">
-  <h2>Grouping selection</h2>
-  <!-- The select and the button will be created here by JavaScript -->
-</section>
+  <h1 id="title">OpenAI Chat Interface</h1>
+  <div id="chat-container">
+    <div id="chat-window">
+      <!-- Chat messages will be appended here -->
+    </div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="Type your message...">
+      <button id="send-button">Send</button>
+    </div>
+  </div>
   <script>
     const clientId = 'a6265673-e275-4520-93fe-4247e115d3b6';
     let platformClient;
-    let ApiError = 'You must specify a search interval as part of your query that does not exceed 7 days';
-    
+
     document.addEventListener('DOMContentLoaded', function () {
       startGCSDKs(clientId).then((client) => {
         platformClient = client;
       });
 
-      document.getElementById('saveButton').addEventListener('click', function() {
-        let maxDays = 7;
-        let startDate = new Date(document.getElementById('startDate').value);
-        let endDate = new Date(document.getElementById('endDate').value);
-        if(platformClient && startDate && endDate) {
-          if ((endDate - startDate) / (1000*60*60*24) >= maxDays) {
-            document.getElementById('error').innerText = ApiError;
-          } else {
-            getAnalytics(startDate.toISOString(), endDate.toISOString())
-              .then(tables => {
-                let columnNames = getColumnNames(tables);
-                // Create the select element
-                let groupingSelect = document.createElement('select');
-                groupingSelect.id = 'groupingSelect';
+      document.getElementById('send-button').addEventListener('click', function() {
+        let chatInput = document.getElementById('chat-input').value;
 
-                // Create the label for the select
-                let label = document.createElement('label');
-                label.for = 'groupingSelect';
-                label.textContent = 'Group by: ';
+        // TODO: Interact with the OpenAI API here and add responses to the chat window.
 
-                // Create the button
-                let groupingSaveButton = document.createElement('button');
-                groupingSaveButton.id = 'groupingSaveButton';
-                groupingSaveButton.textContent = 'Save';
-
-                // Populate the dropdown with the column names
-                for (let columnName of columnNames) {
-                  let optionElement = document.createElement('option');
-                  optionElement.value = columnName;
-                  optionElement.textContent = columnName;
-                  groupingSelect.appendChild(optionElement);
-                }
-
-                // Append the label, the select, and the button to the section, and display the section
-                let groupingSection = document.getElementById('groupingSection');
-                groupingSection.appendChild(label);
-                groupingSection.appendChild(groupingSelect);
-                groupingSection.appendChild(groupingSaveButton);
-                groupingSection.style.display = 'block';
-              
-                document.getElementById('groupingSaveButton').addEventListener('click', function() {
-                  let groupingField = document.getElementById('groupingSelect').value;
-                  // Get the tables again because they might have changed since we first got them
-                  getAnalytics(startDate.toISOString(), endDate.toISOString())
-                    .then(tables => {
-                      draw(tables, groupingField);
-                    });
-                });
-              });
-          }
-        }
+        // Reset chat input
+        document.getElementById('chat-input').value = '';
       });
-    }); 
+    });
   </script>
 </body>
 </html>
